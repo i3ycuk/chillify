@@ -1,0 +1,16 @@
+{
+  "private_welcome": "Salam! Bu sənin rahatlamağın üçün şəxsi yerindir. 🌿",
+  "group_welcome": "Salam, qrup! Mən buradayam, sizin rahatlığınız və pozitivliyinizi təmin etmək üçün. 🌟",
+  "start_message": "Mən Chillify 🌿 — sənin rahatlama botunam. Nə istəyirsən seç:",
+  "help_message": "Salam! Mən Chillify 🌿, sənin rahatlama və yaxşı əhval botundayam. ✨\n\nƏlçatan komandalar:\n/start — bot ilə əlaqə qurmağa başla.\n/quotes — ilham verən sitatlar al.\n/memes — yaxşı əhval üçün memlər al.\n/relax — gərginliyi azaldan rahatlatıcı mesajlar al.\n/help — bot haqqında məlumat.\n/lang — danışmaq üçün dil seç.\n/about — mənim və mənim yaradıcım haqqında daha çox məlumat əldə et.\n\nMənə mesaj yaz və mən sənə rahatlamanda kömək edərəm! 🌱",
+  "about_message": "Chillify 🌿 — sənin rahatlamağa və əhvalını yaxşılaşdırmağa kömək edən bir botdur, memlər, sitatlar və sakitləşdirici mesajlar təqdim edir.\n\nYaradıcı: @li3ycuk\n\nQoşul və hər yerdə pozitiv enerji al!",
+  "button_quotes": "Sitatlar 📝",
+  "button_memes": "Memlər 😂",
+  "button_relax": "Rahatlan 🧘‍♂️",
+  "bot_blocked": "Zəhmət olmasa botu blokdan çıxarın, dili seçmək üçün.",
+  "to_back": "⬅️ Geri",
+  "to_go": "➡️ İrəlilə",
+  "go_to_private_message": "Zəhmət olmasa dil seçmək üçün şəxsi mesajlara keçin.",
+  "choose_language": "Chillify 🌿 ilə əlaqə qurmaq üçün dilinizi seçin.",
+  "lang_selected": "- Diliniz uğurla yeniləndi! 🎉"
+}

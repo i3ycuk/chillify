@@ -1,0 +1,16 @@
+{
+  "private_welcome": "你好！这是你的私人放松空间。🌿",
+  "group_welcome": "你好，团队！我在这里为你们提供舒适和正能量。🌟",
+  "start_message": "我是 Chillify 🌿 — 你的放松助手。选择你想要的内容：",
+  "help_message": "你好！我是 Chillify 🌿，你的放松和心情提升助手。✨\n\n可用命令：\n/start — 开始与我互动。\n/quotes — 获取鼓舞人心的名言。\n/memes — 获取让你开心的表情包。\n/relax — 获取放松信息，减轻压力。\n/help — 了解我的功能和信息。\n/lang — 选择你的语言。\n/about — 了解更多关于我和我的开发者。\n\n给我发消息，我会帮助你放松！🌱",
+  "about_message": "Chillify 🌿 — 这是一个帮助你放松和提升心情的机器人，提供表情包、名言和舒缓信息。\n\n开发者：@li3ycuk\n\n加入我们，随时随地获取正能量！",
+  "button_quotes": "名言 📝",
+  "button_memes": "表情包 😂",
+  "button_relax": "放松 🧘‍♂️",
+  "bot_blocked": "请解锁机器人以选择语言。",
+  "to_back": "⬅️ 返回",
+  "to_go": "➡️ 前进",
+  "go_to_private_message": "请进入私聊，选择你的语言。",
+  "choose_language": "选择你偏好的语言与 Chillify 🌿 交流。",
+  "lang_selected": "- 你的语言已成功更新！🎉"
+}

@@ -1,0 +1,16 @@
+{
+  "private_welcome": "안녕하세요! 여기는 당신의 개인적인 휴식 공간입니다. 🌿",
+  "group_welcome": "안녕하세요, 그룹! 저는 여러분에게 편안함과 긍정적인 에너지를 제공하기 위해 여기 있습니다. 🌟",
+  "start_message": "저는 Chillify 🌿 — 당신의 휴식을 위한 봇입니다. 원하는 것을 선택하세요:",
+  "help_message": "안녕하세요! 저는 Chillify 🌿, 당신의 휴식과 좋은 기분을 위한 봇입니다. ✨\n\n사용 가능한 명령어:\n/start — 봇과 상호작용 시작.\n/quotes — 영감을 주는 인용문 받기.\n/memes — 기분을 좋게 하는 밈 받기.\n/relax — 스트레스를 해소하는 휴식 메시지 받기.\n/help — 봇과 그 기능에 대한 정보.\n/lang — 사용할 언어 선택.\n/about — 나와 내 개발자에 대해 더 알아보기.\n\n저에게 메시지를 보내고, 휴식하는 데 도움이 될 수 있도록 할게요! 🌱",
+  "about_message": "Chillify 🌿는 당신이 휴식을 취하고 기분을 좋게 만들 수 있도록 돕는 봇으로, 밈, 인용문 및 진정시키는 메시지를 제공합니다.\n\n개발자: @li3ycuk\n\n어디서든 긍정적인 에너지를 얻으세요!",
+  "button_quotes": "인용문 📝",
+  "button_memes": "밈 😂",
+  "button_relax": "휴식 🧘‍♂️",
+  "bot_blocked": "언어를 선택하려면 봇을 차단 해제하세요.",
+  "to_back": "⬅️ 뒤로",
+  "to_go": "➡️ 앞으로",
+  "go_to_private_message": "언어를 선택하려면 개인 메시지로 이동하세요.",
+  "choose_language": "Chillify 🌿와 상호작용할 언어를 선택하세요.",
+  "lang_selected": "- 언어가 성공적으로 업데이트되었습니다! 🎉"
+}

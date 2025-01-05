@@ -1,0 +1,4 @@
+aiogram==3.0.0
+openai==4.0.0
+sqlite3==3.37.2
+psycopg2-binary==2.9.3  # Если решишь использовать PostgreSQL

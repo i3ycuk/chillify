@@ -1,0 +1,16 @@
+{
+  "private_welcome": "Hello! This is your personal place for relaxation. 🌿",
+  "group_welcome": "Hello, group! I'm here to bring you comfort and positivity. 🌟",
+  "start_message": "I am Chillify 🌿 — your bot for relaxation. Choose what you'd like:",
+  "help_message": "Hello! I am Chillify 🌿, your bot for relaxation and good vibes. ✨\n\nAvailable commands:\n/start — start interacting with the bot.\n/quotes — get inspiring quotes.\n/memes — get memes for a good mood.\n/relax — get relaxing messages to unwind.\n/help — information about the bot and its features.\n/lang — choose your language.\n/about — learn more about me and my creator.\n\nMessage me and I'll help you relax! 🌱",
+  "about_message": "Chillify 🌿 is a bot that helps you relax and improve your mood by providing memes, quotes, and calming messages.\n\nDeveloper: @li3ycuk\n\nJoin us and get your dose of positive energy wherever you are!",
+  "button_quotes": "Quotes 📝",
+  "button_memes": "Memes 😂",
+  "button_relax": "Relax 🧘‍♂️",
+  "bot_blocked": "Please unblock the bot to choose your language.",
+  "to_back": "⬅️ Back",
+  "to_go": "➡️ Next",
+  "go_to_private_message": "Please go to private messages to choose your language.",
+  "choose_language": "Choose your preferred language for communication with Chillify 🌿.",
+  "lang_selected": "- Your language has been successfully updated! 🎉"
+}

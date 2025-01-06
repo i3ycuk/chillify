@@ -1,4 +1,4 @@
-from brain import sqlite3, logging, dp, types, psycopg2, DB_SETTINGS, datetime, json
+from brain import sqlite3, logging, dp, types, psycopg2, DB_SETTINGS, datetime, json, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -54,28 +54,88 @@ def create_db():
         raise
 
 # Добавление/обновление пользователя
-def add_user(user_id, first_name, last_name, username, birth_date, interests, language, status=None):
+def add_user(
+    user_id: int,
+    first_name: Optional[str] = None,
+    last_name: Optional[str] = None,
+    username: Optional[str] = None,
+    birth_date: Optional[datetime.date] = None,
+    interests: Optional[str] = None,
+    language: Optional[str] = None,
+    status: Optional[str] = None,
+    last_start_message_id: Optional[int] = None,
+    last_bot_message_id: Optional[int] = None
+):
+    """Добавляет или обновляет пользователя в базе данных."""
+
     try:
         with connect_db() as conn:
             with conn.cursor() as cursor:
-                cursor.execute("""
-                    INSERT INTO users (id, first_name, last_name, username, chats_info, total_messages, last_seen, first_message_date, birth_date, interests, language, status)
-                    VALUES (%s, %s, %s, %s, %s::jsonb, 0, NULL, NULL, %s, %s, %s, %s)
-                    ON CONFLICT (id) DO UPDATE SET 
-                        first_name = %s, 
-                        last_name = %s, 
-                        username = %s, 
-                        birth_date = %s, 
-                        interests = %s, 
-                        language = %s,
-                        status = %s,
-                        last_seen = NULL
-                """, (user_id, first_name, last_name, username, "{}", birth_date, interests, language, status, first_name, last_name, username, birth_date, interests, language, status))
-                conn.commit()
+                # Проверяем, существует ли пользователь уже
+                cursor.execute("SELECT id FROM users WHERE id = %s", (user_id,))
+                existing_user = cursor.fetchone()
+
+                if existing_user:
+                    # Пользователь существует, обновляем данные
+                    update_query = "UPDATE users SET "
+                    update_values = []
+                    query_parts = []
+
+                    if first_name is not None:
+                        query_parts.append("first_name = %s")
+                        update_values.append(first_name)
+                    if last_name is not None:
+                        query_parts.append("last_name = %s")
+                        update_values.append(last_name)
+                    if username is not None:
+                        query_parts.append("username = %s")
+                        update_values.append(username)
+                    if birth_date is not None:
+                        query_parts.append("birth_date = %s")
+                        update_values.append(birth_date)
+                    if interests is not None:
+                        query_parts.append("interests = %s")
+                        update_values.append(interests)
+                    if language is not None:
+                        query_parts.append("language = %s")
+                        update_values.append(language)
+                    if status is not None:
+                        query_parts.append("status = %s")
+                        update_values.append(status)
+                    if last_start_message_id is not None:
+                        query_parts.append("last_start_message_id = %s")
+                        update_values.append(last_start_message_id)
+                    if last_bot_message_id is not None:
+                        query_parts.append("last_bot_message_id = %s")
+                        update_values.append(last_bot_message_id)
+
+
+                    if query_parts: # Проверяем есть ли что обновлять
+                        update_query += ", ".join(query_parts)
+                        update_query += " WHERE id = %s"
+                        update_values.append(user_id)
+                        cursor.execute(update_query, tuple(update_values))
+                        conn.commit()
+                        logging.info(f"User {user_id} updated in the database.")
+                    else:
+                        logging.info(f"User {user_id} already exists, no updates needed.")
+
+                else:
+                    # Пользователя нет, добавляем нового
+                    insert_query = """
+                        INSERT INTO users (id, first_name, last_name, username, birth_date, interests, language, status, last_start_message_id, last_bot_message_id)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    cursor.execute(
+                        insert_query,
+                        (user_id, first_name, last_name, username, birth_date, interests, language, status, last_start_message_id, last_bot_message_id),
+                    )
+                    conn.commit()
+                    logging.info(f"User {user_id} added to the database.")
+
     except psycopg2.Error as e:
-        conn.rollback()
-        logger.critical(f"Ошибка добавления/обновления пользователя {user_id}: {e}")
-        raise
+        logging.error(f"Error adding/updating user {user_id} in the database: {e}")
+        raise # Важно пробрасывать исключение выше для обработки в вызывающем коде
 
 # Добавление сообщения
 def add_message(user_id, user_full_name, username, chat_name, chat_id, chat_type, message_text, message_id_in_chat):

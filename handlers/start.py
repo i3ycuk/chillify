@@ -1,7 +1,8 @@
 from brain import dp, psycopg2, types, localization, get_user_language, logger, InlineKeyboardMarkup, InlineKeyboardButton, bot, add_user, get_random_quote, get_random_meme, get_relax_message, get_gif, Dispatcher
 
 async def greet_user(message: types.Message, data: dict):
-    language = data.get("language")
+    print(f"Received data: {data}")  # Print data to verify language
+    language = data.get("language") or "en"
     localization.set_language(language)
 
     if message.chat.type == 'private':
@@ -11,7 +12,8 @@ async def greet_user(message: types.Message, data: dict):
     await message.reply(greeting_message)
 
 async def send_start_menu(message: types.Message, data: dict):
-    language = data.get("language")
+    print(f"Received data: {data}")  # Print data to verify language
+    language = data.get("language") or "en"
     localization.set_language(language)
 
     user_id = message.from_user.id

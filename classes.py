@@ -1,4 +1,15 @@
-from brain import json, StatesGroup, State, logging, os
+from brain import json, StatesGroup, State, logging, os, get_user_language, BaseMiddleware, types, dp
+
+class LocalizationMiddleware(BaseMiddleware):
+    async def __call__(self, handler, update: types.Update, data: dict):
+        user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
+        language = get_user_language(user_id) or "en"
+        data["language"] = language
+        print(f"Set language in data: {data}")  # Print data for debugging
+        return await handler(update, data)
+
+# Registration remains the same
+dp.middleware.setup(LocalizationMiddleware())
 
 class Localization:
     def __init__(self, default_lang: str = "en"):

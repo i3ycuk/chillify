@@ -1,4 +1,4 @@
-from brain import Dispatcher, os, importlib, logging, dp, create_db, executor, localization, BaseMiddleware, types, get_user_language
+from brain import Dispatcher, os, importlib, logging, dp, create_db, executor, localization
 
 def register_handlers_from_directory(dp, handlers_dir="handlers"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -32,20 +32,6 @@ print("Регистрация обработчиков завершена.")
 print("Начинаем polling...")
 print("Бот запущен!")
 
-# Middleware для локализации
-class LocalizationMiddleware(BaseMiddleware):
-    async def on_process_message(self, message: types.Message, data: dict):
-        user_id = message.from_user.id
-        language = get_user_language(user_id) or "en"
-        data["language"] = language
-
-    async def on_process_callback_query(self, callback_query: types.CallbackQuery, data: dict):
-        user_id = callback_query.from_user.id
-        language = get_user_language(user_id) or "en"
-        data["language"] = language
-
-# Регистрация middleware
-dp.middleware.setup(LocalizationMiddleware())
 async def main():
     # Запуск polling
     await dp.start_polling()

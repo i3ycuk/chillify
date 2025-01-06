@@ -1,5 +1,7 @@
 from brain import sqlite3, logging, dp, types, psycopg2, DB_SETTINGS, datetime, json
 
+logger = logging.getLogger(__name__)
+
 # Подключение к базе данных
 def connect_db():
     try:
@@ -26,7 +28,10 @@ def create_db():
                         first_message_date TIMESTAMP WITH TIME ZONE, -- Интересы пользователя (в виде строки или JSON). 
                         birth_date DATE, -- Дата рождения.
                         interests TEXT, -- Интересы пользователя (в виде строки или JSON). 
-                        language TEXT -- Язык пользователя (например, "ru", "en").
+                        language TEXT, -- Язык пользователя (например, "ru", "en").
+                        status TEXT,
+                        last_start_message_id INTEGER,
+                        last_bot_message_id INTEGER
                     )
                 """)
                 cursor.execute("""
@@ -48,22 +53,29 @@ def create_db():
         logging.critical(f"Ошибка создания таблиц: {e}")
         raise
 
-# Добавление пользователя
-def add_user(user_id, first_name, last_name, username, birth_date, interests, language):
+# Добавление/обновление пользователя
+def add_user(user_id, first_name, last_name, username, birth_date, interests, language, status=None):
     try:
         with connect_db() as conn:
             with conn.cursor() as cursor:
                 cursor.execute("""
-                    INSERT INTO users (id, first_name, last_name, username, chats_info, total_messages, last_seen, first_message_date, birth_date, interests, language)
-                    VALUES (%s, %s, %s, %s, %s::jsonb, 0, NULL, NULL, %s, %s, %s)
-                    ON CONFLICT (id) DO NOTHING
-                """, (user_id, first_name, last_name, username, "{}", birth_date, interests, language))
+                    INSERT INTO users (id, first_name, last_name, username, chats_info, total_messages, last_seen, first_message_date, birth_date, interests, language, status)
+                    VALUES (%s, %s, %s, %s, %s::jsonb, 0, NULL, NULL, %s, %s, %s, %s)
+                    ON CONFLICT (id) DO UPDATE SET 
+                        first_name = %s, 
+                        last_name = %s, 
+                        username = %s, 
+                        birth_date = %s, 
+                        interests = %s, 
+                        language = %s,
+                        status = %s,
+                        last_seen = NULL
+                """, (user_id, first_name, last_name, username, "{}", birth_date, interests, language, status, first_name, last_name, username, birth_date, interests, language, status))
                 conn.commit()
     except psycopg2.Error as e:
         conn.rollback()
-        logging.critical(f"Ошибка добавления пользователя {user_id}: {e}")
+        logger.critical(f"Ошибка добавления/обновления пользователя {user_id}: {e}")
         raise
-
 
 # Добавление сообщения
 def add_message(user_id, user_full_name, username, chat_name, chat_id, chat_type, message_text, message_id_in_chat):
@@ -90,15 +102,27 @@ def add_message(user_id, user_full_name, username, chat_name, chat_id, chat_type
                 conn.commit()
     except psycopg2.Error as e:
         conn.rollback()
-        logging.error(f"Ошибка добавления сообщения от пользователя {user_id} в чат {chat_id}: {e}", exc_info=True) # Добавлено exc_info=True
+        logger.error(f"Ошибка добавления сообщения от пользователя {user_id} в чат {chat_id}: {e}", exc_info=True)
         raise
 
+# Получение данных пользователя по ID
+def get_user(user_id):
+    try:
+        with connect_db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+                user_data = cursor.fetchone()
+                if user_data:
+                    columns = [desc[0] for desc in cursor.description]
+                    user_dict = dict(zip(columns, user_data))
+                    return user_dict
+                return None
+    except psycopg2.Error as e:
+        logging.error(f"Ошибка получения пользователя {user_id}: {e}")
+        return None
 
 # Получение языка пользователя
 def get_user_language(user_id):
-    if not isinstance(user_id, int):
-        logging.error("user_id должен быть целым числом")
-        return None
     try:
         with connect_db() as conn:
             with conn.cursor() as cursor:
@@ -123,3 +147,16 @@ def get_user_chat_info(user_id, chat_id):
     except psycopg2.Error as e:
         logging.error(f"Ошибка получения информации о чате пользователя {user_id} в чате {chat_id}: {e}")
         return None
+
+# Обновление ID сообщений start/menu
+def update_user_messages(user_id, user_message_id, bot_message_id):
+    try:
+        with connect_db() as conn:
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    UPDATE users SET last_start_message_id = %s, last_bot_message_id = %s WHERE id = %s
+                """, (user_message_id, bot_message_id, user_id))
+                conn.commit()
+    except psycopg2.Error as e:
+        logging.error(f"Ошибка обновления ID сообщений пользователя {user_id}: {e}")
+        conn.rollback()

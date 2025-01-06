@@ -1,62 +1,83 @@
-from brain import dp, psycopg2, types, localization, get_user_language, InlineKeyboardMarkup, InlineKeyboardButton, sqlite3, logging, get_random_quote, bot, get_random_meme, get_relax_message, get_gif, Dispatcher, add_user
+from brain import dp, psycopg2, types, localization, get_user_language, logger, InlineKeyboardMarkup, InlineKeyboardButton, bot, add_user, get_random_quote, get_random_meme, get_relax_message, get_gif, Dispatcher
 
-async def send_welcome(message: types.Message):
-    print(f"Получена команда: {message.text}")
+async def greet_user(message: types.Message, data: dict):
+    language = data.get("language")
+    localization.set_language(language)
+
+    if message.chat.type == 'private':
+        greeting_message = localization.get("private_welcome")
+    else:
+        greeting_message = localization.get("group_welcome")
+    await message.reply(greeting_message)
+
+async def send_start_menu(message: types.Message, data: dict):
+    language = data.get("language")
+    localization.set_language(language)
+
     user_id = message.from_user.id
     first_name = message.from_user.first_name
     last_name = message.from_user.last_name
     username = message.from_user.username
-    language = get_user_language(user_id)  # Получаем язык пользователя из базы
-    localization.set_language(language)  # Устанавливаем язык для локализации
-    birth_date = None  # Здесь можешь добавить логику для получения даты рождения, если нужно
-    interests = None  # Здесь можешь добавить логику для получения интересов пользователя, если нужно
-    
-    # Логика для личных и групповых чатов
-    if message.chat.type == 'private':
-        await message.reply(localization.get("private_welcome"))
-    else:
-        await message.reply(localization.get("group_welcome"))
 
-    # Добавляем инлайн кнопки
     keyboard = InlineKeyboardMarkup(row_width=2)
-    button_quotes = InlineKeyboardButton(localization.get("button_quotes"), callback_data="quotes")
-    button_memes = InlineKeyboardButton(localization.get("button_memes"), callback_data="memes")
-    button_relax = InlineKeyboardButton(localization.get("button_relax"), callback_data="relax")
-    keyboard.add(button_quotes, button_memes, button_relax)
+    buttons = [
+        InlineKeyboardButton(localization.get("button_quotes"), callback_data="quotes"),
+        InlineKeyboardButton(localization.get("button_memes"), callback_data="memes"),
+        InlineKeyboardButton(localization.get("button_relax"), callback_data="relax"),
+    ]
+    keyboard.add(*buttons)
+
+    try:
+        add_user(user_id, first_name, last_name, username, None, None, language) # Используем язык из data
+        logger.info(f"User {user_id} added to the database.")
+    except psycopg2.Error as e:
+        logger.error(f"Error adding user {user_id} to the database: {e}")
+        await message.reply(localization.get("registration_error"))
+        return
+
     await message.reply(localization.get("start_message"), reply_markup=keyboard)
 
-    # Добавляем пользователя в базу данных
-    try:
-        add_user(user_id, first_name, last_name, username, birth_date, interests, language)
-        logging.info(f"Пользователь {user_id} успешно добавлен в базу данных.")
-    except psycopg2.Error as e:
-        logging.error(f"Ошибка при добавлении пользователя {user_id} в базу данных: {e}")
-        await message.reply("Произошла ошибка при регистрации. Пожалуйста, попробуйте позже.") # Сообщение пользователю об ошибке
-        return # Прерываем выполнение функции, чтобы избежать дальнейших ошибок
+async def handle_quotes(callback_query: types.CallbackQuery, data: dict):
+    language = data.get("language")
+    localization.set_language(language)
+    quote = get_random_quote()
+    await bot.send_message(callback_query.message.chat.id, quote)
 
-# Обработчик кнопок для инлайн меню
-async def handle_callback(callback_query: types.CallbackQuery):
-    logging.info(f"Получен callback: {callback_query.data}")  # Логируем вызов
-    data = callback_query.data
-    chat_id = callback_query.message.chat.id  # ID чата, в котором была нажата кнопка
+async def handle_memes(callback_query: types.CallbackQuery, data: dict):
+    language = data.get("language")
+    localization.set_language(language)
+    meme = get_random_meme()
+    await bot.send_message(callback_query.message.chat.id, meme)
 
-    if data == 'quotes':
-        quote = get_random_quote()
-        await bot.send_message(chat_id, quote)  # Отправляем ответ в тот же чат
-    elif data == 'memes':
-        meme = get_random_meme()
-        await bot.send_message(chat_id, meme)  # Отправляем ответ в тот же чат
-    elif data == 'relax':
-        relax_msg = get_relax_message()
-        gif_url = get_gif("relax")
-        if gif_url:
-            await bot.send_animation(chat_id, gif_url, caption=relax_msg)  # Отправляем анимацию в чат
-        else:
-            await bot.send_message(chat_id, relax_msg)  # Отправляем текстовое сообщение в чат
+async def handle_relax(callback_query: types.CallbackQuery, data: dict):
+    language = data.get("language")
+    localization.set_language(language)
+    relax_msg = get_relax_message()
+    gif_url = get_gif("relax")
+    if gif_url:
+        await bot.send_animation(callback_query.message.chat.id, gif_url, caption=relax_msg)
+    else:
+        await bot.send_message(callback_query.message.chat.id, relax_msg)
 
-    await bot.answer_callback_query(callback_query.id)  # Ответ на инлайн запрос
- 
+async def handle_callback(callback_query: types.CallbackQuery, data: dict):
+    language = data.get("language")
+    localization.set_language(language)
+    callback_data = callback_query.data
+    handlers = {
+        "quotes": handle_quotes,
+        "memes": handle_memes,
+        "relax": handle_relax,
+    }
+    handler = handlers.get(callback_data)
+    if handler:
+        await handler(callback_query, data) # Передаем data в обработчики
+    else:
+        logger.warning(f"Unknown callback data: {callback_data}")
+
+    await bot.answer_callback_query(callback_query.id)
+
 def register(dp: Dispatcher):
-    dp.register_message_handler(send_welcome, commands=["start"])
-    dp.register_callback_query_handler(handle_callback, lambda c: c.data and c.data in ['quotes', 'memes', 'relax'])
-    print("start успешно зарегистрирован.")
+    dp.register_message_handler(greet_user, commands=["start"])  # Убрали pass_args=True
+    dp.register_message_handler(send_start_menu, commands=["menu"])  # Убрали pass_args=True
+    dp.register_callback_query_handler(handle_callback, lambda c: c.data and c.data in ['quotes', 'memes', 'relax']) # Убрали pass_args=True
+    logger.info("start registered.")

@@ -1,4 +1,4 @@
-from brain import dp, psycopg2, types, localization, get_user_language, logger, InlineKeyboardMarkup, InlineKeyboardButton, bot, add_user, get_random_quote, get_random_meme, get_relax_message, get_gif, Dispatcher, partial, FSMContext, get_user, CommandStart, logging
+from brain import dp, psycopg2, types, localization, get_user_language, logger, InlineKeyboardMarkup, InlineKeyboardButton, bot, add_user, get_random_quote, get_random_meme, get_relax_message, get_gif, Dispatcher, partial, FSMContext, get_user, CommandStart, logging, CallbackData
 
 async def greet_user(message: types.Message, state: FSMContext):  # Use state
     user_id = message.from_user.id
@@ -31,6 +31,8 @@ async def greet_user(message: types.Message, state: FSMContext):  # Use state
             await message.answer(localization.get("group_welcome"))
     await send_start_menu(message, state)
 
+# Создаем фабрику callback_data
+menu_cd = CallbackData("menu", "item")  # "menu" - префикс, "item" - значение
 
 async def send_start_menu(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
@@ -65,21 +67,39 @@ async def send_start_menu(message: types.Message, state: FSMContext):
 
     await message.reply(localization.get("start_message"), reply_markup=keyboard)
 
-async def handle_quotes(callback_query: types.CallbackQuery, data: dict):
-    language = data.get("language")
+async def handle_menu_callback(callback_query: types.CallbackQuery, callback_data: dict):
+    # Разбираем callback_data с помощью фабрики
+    item = callback_data["item"]
+    user_id = callback_query.from_user.id
+    user_data = get_user(user_id)
+    if not user_data:
+        logging.error(f"User with ID {user_id} not found.")
+        return
+    language = user_data["language"]
     localization.set_language(language)
+    handlers = {
+        "quotes": handle_quotes,
+        "memes": handle_memes,
+        "relax": handle_relax,
+    }
+    handler = handlers.get(item)
+    if handler:
+        await handler(callback_query) # Больше не нужно передавать data
+    else:
+        logger.warning(f"Unknown menu item: {item}")
+
+    await callback_query.answer()
+
+
+async def handle_quotes(callback_query: types.CallbackQuery):
     quote = get_random_quote()
     await bot.send_message(callback_query.message.chat.id, quote)
 
-async def handle_memes(callback_query: types.CallbackQuery, data: dict):
-    language = data.get("language")
-    localization.set_language(language)
+async def handle_memes(callback_query: types.CallbackQuery):
     meme = get_random_meme()
     await bot.send_message(callback_query.message.chat.id, meme)
 
-async def handle_relax(callback_query: types.CallbackQuery, data: dict):
-    language = data.get("language")
-    localization.set_language(language)
+async def handle_relax(callback_query: types.CallbackQuery):
     relax_msg = get_relax_message()
     gif_url = get_gif("relax")
     if gif_url:
@@ -87,25 +107,9 @@ async def handle_relax(callback_query: types.CallbackQuery, data: dict):
     else:
         await bot.send_message(callback_query.message.chat.id, relax_msg)
 
-async def handle_callback(callback_query: types.CallbackQuery, data: dict):
-    language = data.get("language")
-    localization.set_language(language)
-    callback_data = callback_query.data
-    handlers = {
-        "quotes": handle_quotes,
-        "memes": handle_memes,
-        "relax": handle_relax,
-    }
-    handler = handlers.get(callback_data)
-    if handler:
-        await handler(callback_query, data) # Передаем data в обработчики
-    else:
-        logger.warning(f"Unknown callback data: {callback_data}")
-
-    await bot.answer_callback_query(callback_query.id)
 
 def register(dp: Dispatcher):
     dp.register_message_handler(greet_user, CommandStart())
     dp.register_message_handler(send_start_menu, commands=["menu"])
-    dp.register_callback_query_handler(handle_callback, lambda c: c.data and c.data in ['quotes', 'memes', 'relax'])
+    dp.register_callback_query_handler(handle_menu_callback, menu_cd.filter()) # Используем фильтр
     logger.info("start registered.")

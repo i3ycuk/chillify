@@ -8,6 +8,7 @@ from aiogram.dispatcher import FSMContext
 from aiogram.utils import executor
 from aiogram.utils.exceptions import BotBlocked, MessageToDeleteNotFound, MessageCantBeDeleted
 from aiogram.utils.markdown import text, bold, italic, code
+from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.dispatcher.filters import Command

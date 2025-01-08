@@ -1,4 +1,4 @@
-from brain import logging, dp, BotBlocked, StringIO, connect_db, psycopg2
+from brain import logging, dp, BotBlocked, StringIO, connect_db, psycopg2, asyncio, bot
 
 # Настраиваем логирование
 log_stream = StringIO()
@@ -35,3 +35,20 @@ async def error_handler(update, exception):
 
 logger = logging.getLogger(__name__) # Получаем логгер для текущего модуля
 logger.debug("Debug сообщение из logs.py") # Пример использования debug-уровня
+
+# Новый кэш с автоматической очисткой
+message_cache = {}
+
+# Очистка кэша каждые сутки
+async def clear_cache_daily():
+    while True:
+        await asyncio.sleep(86400)  # 24 часа
+        message_cache.clear()
+        logging.info("Message cache has been cleared.")
+
+async def safe_delete_message(chat_id, message_id):
+    try:
+        await bot.delete_message(chat_id, message_id)
+    except Exception as e:
+        if "message to delete not found" not in str(e).lower():
+            logging.error(f"Error deleting message {message_id} in chat {chat_id}: {e}")

@@ -31,9 +31,6 @@ async def greet_user(message: types.Message, state: FSMContext):  # Use state
             await message.answer(localization.get("group_welcome"))
     await send_start_menu(message, state)
 
-# Создаем фабрику callback_data
-menu_cd = CallbackData("menu", "item")  # "menu" - префикс, "item" - значение
-
 async def send_start_menu(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     user_data = get_user(user_id)
@@ -67,9 +64,8 @@ async def send_start_menu(message: types.Message, state: FSMContext):
 
     await message.reply(localization.get("start_message"), reply_markup=keyboard)
 
-async def handle_menu_callback(callback_query: types.CallbackQuery, callback_data: dict):
-    # Разбираем callback_data с помощью фабрики
-    item = callback_data["item"]
+async def handle_menu_callback(callback_query: types.CallbackQuery):  # callback_data больше не передается
+    item = callback_query.data  # Получаем callback_data как строку
     user_id = callback_query.from_user.id
     user_data = get_user(user_id)
     if not user_data:
@@ -84,7 +80,7 @@ async def handle_menu_callback(callback_query: types.CallbackQuery, callback_dat
     }
     handler = handlers.get(item)
     if handler:
-        await handler(callback_query) # Больше не нужно передавать data
+        await handler(callback_query)
     else:
         logger.warning(f"Unknown menu item: {item}")
 
@@ -111,5 +107,5 @@ async def handle_relax(callback_query: types.CallbackQuery):
 def register(dp: Dispatcher):
     dp.register_message_handler(greet_user, CommandStart())
     dp.register_message_handler(send_start_menu, commands=["menu"])
-    dp.register_callback_query_handler(handle_menu_callback, menu_cd.filter()) # Используем фильтр
+    dp.register_callback_query_handler(handle_menu_callback, lambda c: c.data in ["quotes", "memes", "relax"]) # Фильтрация с помощью lambda
     logger.info("start registered.")

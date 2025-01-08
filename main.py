@@ -1,4 +1,4 @@
-from brain import Dispatcher, os, importlib, logging, dp, create_db, executor, localization
+from brain import Dispatcher, os, importlib, logging, dp, create_db, executor, localization, asyncio, clear_cache_daily
 
 def register_handlers_from_directory(dp, handlers_dir="handlers"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -36,7 +36,11 @@ async def main():
     # Запуск polling
     await dp.start_polling()
 
+async def on_startup(dispatcher):
+    asyncio.create_task(clear_cache_daily())
+    logging.info("Cache cleaning task has been started.")
+
 # Запуск бота
 if __name__ == '__main__':
     create_db()
-    executor.start_polling(dp, skip_updates=True)
+    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)

@@ -33,7 +33,7 @@ from classes import *
 
 localization = Localization()
 
-from logs import *
+from logs import log_stream, error_handler, logger, message_cache, clear_cache_daily, safe_delete_message
 from handlers.giphy import get_gif
 from handlers.quotes import get_random_quote
 from handlers.memes import get_random_meme

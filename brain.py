@@ -1,5 +1,8 @@
-import logging, sqlite3, asyncio, json, random, os, importlib, openai, requests, sys, subprocess, dominate, datetime, psycopg2
+import logging, sqlite3, asyncio, json, random, os, importlib, openai, requests, sys, subprocess, dominate, datetime, psycopg2, utils, threading, time
 
+from datetime import timedelta
+from gui import run_gui, MainWindow
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from aiogram import Bot, Dispatcher, types, executor, exceptions
 from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
 from aiogram.dispatcher.filters.state import State, StatesGroup

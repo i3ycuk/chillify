@@ -27,14 +27,14 @@
       <item>
        <widget class="QLabel" name="connection_label">
         <property name="text">
-         <string>Connection:</string>
+         <string>Сообщение: </string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QLabel" name="connection_status_label">
         <property name="text">
-         <string>Disconnected</string>
+         <string>Отключено</string>
         </property>
        </widget>
       </item>
@@ -54,81 +54,81 @@
      </layout>
     </item>
     <item>
-        <widget class="QFrame" name="input_frame">
-            <layout class="QVBoxLayout" name="input_layout">
-                <item>
-                    <layout class="QHBoxLayout" name="horizontalLayout_chat_id">
-                        <item>
-                            <widget class="QLabel" name="chat_id_label">
-                                <property name="text">
-                                    <string>Chat ID:</string>
-                                </property>
-                            </widget>
-                        </item>
-                        <item>
-                            <widget class="QLineEdit" name="chat_id_input"/>
-                        </item>
-                    </layout>
-                </item>
-                <item>
-                    <widget class="QPlainTextEdit" name="message_input"/>
-                </item>
-                <item>
-                    <widget class="QPushButton" name="send_message_button">
-                        <property name="text">
-                            <string>Send</string>
-                        </property>
-                    </widget>
-                </item>
-            </layout>
+     <widget class="QFrame" name="input_frame">
+      <layout class="QVBoxLayout" name="input_layout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_chat_id">
+         <item>
+          <widget class="QLabel" name="chat_id_label">
+           <property name="text">
+            <string>ID чата:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="chat_id_input"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QPlainTextEdit" name="message_input"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="send_message_button">
+         <property name="text">
+          <string>Отправить</string>
+         </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <widget class="QListWidget" name="messages_list"/>
     </item>
     <item>
-        <widget class="QFrame" name="reply_frame">
-            <layout class="QVBoxLayout" name="reply_layout">
-                <item>
-                    <widget class="QPlainTextEdit" name="reply_input"/>
-                </item>
-                <item>
-                    <widget class="QPushButton" name="send_reply_button">
-                        <property name="text">
-                            <string>Send Reply</string>
-                        </property>
-                    </widget>
-                </item>
-            </layout>
+     <widget class="QFrame" name="reply_frame">
+      <layout class="QVBoxLayout" name="reply_layout">
+       <item>
+        <widget class="QPlainTextEdit" name="reply_input"/>
+       </item>
+       <item>
+        <widget class="QPushButton" name="send_reply_button">
+         <property name="text">
+          <string>Ответить</string>
+         </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
     </item>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_buttons">
       <item>
        <widget class="QPushButton" name="start_button">
         <property name="text">
-         <string>Start Client</string>
+         <string>Запустить клиент</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="stop_button">
         <property name="text">
-         <string>Stop Client</string>
+         <string>Остановить клиент</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="clear_cache_button">
         <property name="text">
-         <string>Clear Cache</string>
+         <string>Очистить кэш</string>
         </property>
        </widget>
       </item>
       <item>
        <widget class="QPushButton" name="clear_chat_button">
         <property name="text">
-         <string>Clear Chat</string>
+         <string>Очистить чат</string>
         </property>
        </widget>
       </item>
@@ -136,6 +136,34 @@
     </item>
    </layout>
   </widget>
+  <action name="actionLightTheme">
+   <property name="text">
+    <string>Светлая</string>
+   </property>
+  </action>
+  <action name="actionDarkTheme">
+   <property name="text">
+    <string>Темная</string>
+   </property>
+  </action>
+  <menubar name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>600</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuTheme">
+    <property name="title">
+     <string>Тема</string>
+    </property>
+    <addaction name="actionLightTheme"/>
+    <addaction name="actionDarkTheme"/>
+   </widget>
+   <addaction name="menuTheme"/>
+  </menubar>
  </widget>
  <resources/>
  <connections/>

@@ -13,6 +13,7 @@ logging.basicConfig(filename=LOG_FILE, level=LOG_LEVEL, format='%(asctime)s - %(
 
 client = TelegramClient('session_name', API_ID, API_HASH)
 
+# GUI class
 class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         # Вызов конструктора суперкласса
@@ -70,6 +71,62 @@ class MainWindow(QtWidgets.QMainWindow):
                 margin-top: 5px;
                 margin-bottom: 5px;
             }
+        """)
+
+        def apply_light_theme(self):
+            self.setStyleSheet("""
+            /* Стили для светлой темы (улучшенные) */
+            QMainWindow { background-color: #FFFFFF; }
+            QPlainTextEdit, QLineEdit {
+                background-color: #FFFFFF; color: #000000;
+                border: 1px solid #D0D0D0;
+                selection-background-color: #ADD8E6; /* Цвет выделения */
+            }
+            QListWidget {
+                background-color: #FFFFFF; color: #000000;
+                border: 1px solid #D0D0D0;
+                outline: none; /* Убираем рамку при фокусе */
+            }
+            QListWidget::item:selected { background-color: #E8F0FE; }
+            QPushButton {
+                background-color: #E0E0E0; color: #000000;
+                border: 1px solid #D0D0D0; border-radius: 3px;
+                padding: 6px 12px;
+            }
+            QPushButton:hover { background-color: #D0D0D0; }
+            QLabel { color: #000000; }
+            QFrame { background-color: #F8F8F8; border: 1px solid #D0D0D0; }
+            QMenuBar { background: #FFFFFF; color: #000000; border-bottom: 1px solid #D0D0D0;}
+            QMenuBar::item { background: transparent; padding: 4px 8px;}
+            QMenuBar::item:selected { background: #E0E0E0; }
+        """)
+
+    def apply_dark_theme(self):
+        self.setStyleSheet("""
+            /* Стили для темной темы (улучшенные) */
+            QMainWindow { background-color: #18191c; }
+            QPlainTextEdit, QLineEdit {
+                background-color: #202125; color: #e0e0e0;
+                border: 1px solid #303136;
+                selection-background-color: #38393e; /* Цвет выделения */
+            }
+            QListWidget {
+                background-color: #202125; color: #e0e0e0;
+                border: 1px solid #303136;
+                outline: none;
+            }
+            QListWidget::item:selected { background-color: #38393e; }
+            QPushButton {
+                background-color: #303136; color: #e0e0e0;
+                border: 1px solid #404146; border-radius: 3px;
+                padding: 6px 12px;
+            }
+            QPushButton:hover { background-color: #38393e; }
+            QLabel { color: #e0e0e0; }
+            QFrame { background-color: #28292e; border: 1px solid #303136; }
+            QMenuBar { background: #202125; color: #e0e0e0; border-bottom: 1px solid #303136;}
+            QMenuBar::item { background: transparent; padding: 4px 8px;}
+            QMenuBar::item:selected { background: #38393e; }
         """)
 
     def add_log_message(self, message):
@@ -208,43 +265,49 @@ class MainWindow(QtWidgets.QMainWindow):
         except Exception as e:
             logging.error(f"Error clearing cache: {e}")
             self.show_message("Error", f"Error clearing cache: {e}", QMessageBox.Critical)
-# ... (Предыдущий код: __init__, add_log_message, show_message, message_selected, send_reply, start_client_async, start_client, stop_client, clear_cache)
+
+        # Инициализация виджетов (теперь после загрузки UI)
         self.log_widget = self.findChild(QPlainTextEdit, "log_widget")
         self.log_widget.setReadOnly(True)
         self.message_input = self.findChild(QPlainTextEdit, "message_input")
         self.chat_id_input = self.findChild(QLineEdit, "chat_id_input")
-        self.clear_cache_button.clicked.connect(self.clear_cache)
-        self.send_message_button.clicked.connect(self.send_message)
         self.messages_list = self.findChild(QListWidget, "messages_list")
         self.reply_input = self.findChild(QPlainTextEdit, "reply_input")
-        self.send_reply_button = self.findChild(QPushButton, "send_reply_button")
-        self.clear_chat_button = self.findChild(QPushButton, "clear_chat_button")
-        self.connection_status_label = self.findChild(QLabel, "connection_status_label") # Индикатор состояния
+        self.connection_status_label = self.findChild(QLabel, "connection_status_label")
         self.start_button = self.findChild(QPushButton, "start_button")
         self.stop_button = self.findChild(QPushButton, "stop_button")
+        self.send_message_button = self.findChild(QPushButton, "send_message_button")
+        self.send_reply_button = self.findChild(QPushButton, "send_reply_button")
+        self.clear_cache_button = self.findChild(QPushButton, "clear_cache_button")
+        self.clear_chat_button = self.findChild(QPushButton, "clear_chat_button")
+        self.actionLightTheme = self.findChild(QtWidgets.QAction, "actionLightTheme")
+        self.actionDarkTheme = self.findChild(QtWidgets.QAction, "actionDarkTheme")
 
-        self.send_reply_button.clicked.connect(self.send_reply)
-        self.clear_chat_button.clicked.connect(self.clear_chat)
+        # Подключение сигналов
         self.start_button.clicked.connect(self.start_client)
         self.stop_button.clicked.connect(self.stop_client)
-
-        self.selected_message_id = None
+        self.send_message_button.clicked.connect(self.send_message)
+        self.send_reply_button.clicked.connect(self.send_reply)
+        self.clear_cache_button.clicked.connect(self.clear_cache)
+        self.clear_chat_button.clicked.connect(self.clear_chat)
         self.messages_list.itemClicked.connect(self.message_selected)
+        self.actionLightTheme.triggered.connect(self.apply_light_theme)
+        self.actionDarkTheme.triggered.connect(self.apply_dark_theme)
+
+        # Переменные
+        self.selected_message_id = None
         self.bot_task = None
         self.message_items = {}
         self.connection_timer = QTimer(self)
         self.connection_timer.timeout.connect(self.check_connection)
-        self.connection_timer.start(5000)  # Проверка каждые 5 секунд
+        self.connection_timer.start(5000)
+        self.apply_dark_theme()  # Применяем темную тему по умолчанию
 
     def check_connection(self):
-         if client.is_connected():
-             self.connection_status_label.setText("Connected")
-             self.connection_status_label.setStyleSheet("color: green;")
-         else:
-             self.connection_status_label.setText("Disconnected")
-             self.connection_status_label.setStyleSheet("color: red;")
+        self.connection_status_label.setStyleSheet("color: green;" if client.is_connected() else "color: red;")
+        self.connection_status_label.setText("Подключено" if client.is_connected() else "Отключено")
 
-    async def send_message(self):
+    async def send_message(self):  # Функция теперь внутри класса
         try:
             chat_id = int(self.chat_id_input.text())
             message_text = self.message_input.toPlainText()
@@ -254,7 +317,9 @@ class MainWindow(QtWidgets.QMainWindow):
         except ValueError:
             self.show_message("Ошибка", "Некорректный ID чата.", QMessageBox.Critical)
         except Exception as e:
-            self.show_message("Error", str(e), QMessageBox.Critical)
+            logging.error(f"Ошибка отправки сообщения: {e}")
+            self.show_message("Ошибка", str(e), QMessageBox.Critical)
+
 
 # async def main():
     # Запуск polling

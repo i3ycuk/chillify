@@ -1,7 +1,8 @@
 import logging, sqlite3, asyncio, json, random, os, importlib, openai, requests, sys, subprocess, dominate, datetime, psycopg2, threading, time
 
 from datetime import timedelta
-from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QVBoxLayout, QWidget, QPlainTextEdit, QMessageBox
+from telethon import TelegramClient, events, sync
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QVBoxLayout, QWidget, QPlainTextEdit, QMessageBox, QLineEdit, QTabWidget, QLabel
 from PyQt5.QtCore import Qt
 from aiogram import Bot, Dispatcher, types, executor, exceptions
 from aiogram.types import ParseMode, InlineKeyboardButton, InlineKeyboardMarkup, InputFile
@@ -18,7 +19,7 @@ from aiogram.dispatcher.filters import Command
 from collections import defaultdict
 from locales.languages import LANGUAGES_PER_PAGE, LANGUAGES, LANGUAGES_TRANSLATIONS, LANGUAGES_FLAGS
 from dotenv import load_dotenv
-from config import API_TOKEN, OPENAI_API_KEY, GIPHY_API_KEY, DB_SETTINGS
+from config import API_TOKEN, OPENAI_API_KEY, GIPHY_API_KEY, DB_SETTINGS, DEBUG, CACHE_CLEANUP_INTERVAL, SESSION_NAME, API_ID, API_HASH
 from functools import partial
 
 bot = Bot(token=API_TOKEN)

@@ -1,4 +1,28 @@
-from brain import Dispatcher, os, importlib, logging, dp, bot, create_db, executor, localization, asyncio, clear_cache_daily, sys, QApplication, sqlite3, threading, time, datetime, timedelta, QMessageBox, QMainWindow, QTextEdit, QPushButton, QVBoxLayout, QWidget, QPlainTextEdit, QMessageBox
+from brain import Dispatcher, os, importlib, logging, dp, localization, asyncio, clear_cache_daily, DEBUG, CACHE_CLEANUP_INTERVAL, QApplication, QTextEdit, QMainWindow, QPushButton, QVBoxLayout, QWidget, QLineEdit, QTabWidget, QLabel, TelegramClient, events, sync, SESSION_NAME, API_ID, API_HASH
+
+logging.basicConfig(level=logging.DEBUG if DEBUG else logging.INFO)
+
+# Класс для работы с кэшем
+class Cache:
+    def __init__(self):
+        self.cache = {}
+
+    def set(self, key, value):
+        self.cache[key] = value
+
+    def get(self, key, default=None):
+        return self.cache.get(key, default)
+
+    def delete(self, key):
+        self.cache.pop(key, None)
+
+    async def auto_cleanup(self, interval):
+        while True:
+            await asyncio.sleep(interval)
+            self.cache.clear()
+            logging.info("Cache cleared.")
+
+cache = Cache()
 
 def register_handlers_from_directory(dp, handlers_dir="handlers"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,224 +47,126 @@ def register_handlers_from_directory(dp, handlers_dir="handlers"):
             except ImportError as e:
                 logging.error(f"Ошибка при импорте модуля {module_name}: {e}")
             except Exception as e:
-                logging.exception(f"Неожиданная ошибка при регистрации обработчиков из {module_name}:") # Логируем полный traceback
+                logging.exception(f"Неожиданная ошибка при регистрации обработчиков из {module_name}:")
 
+# Регистрируем обработчики
+print("Запуск регистрации обработчиков.")
+register_handlers_from_directory(dp)
+print("Регистрация обработчиков завершена.")
+print("Начинаем polling...")
+print("Бот запущен!")
 
+# Инициализация клиента Telethon
+client = TelegramClient(SESSION_NAME, API_ID, API_HASH)
+
+# GUI клиента
+class TelegramClientGUI(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle("Chillify 🌿 - Telegram Client")
+        self.setGeometry(100, 100, 900, 700)
+
+        self.tabs = QTabWidget(self)
+
+        # Логирование
+        self.logs_tab = QWidget()
+        self.text_area = QTextEdit(self.logs_tab)
+        self.text_area.setReadOnly(True)
+        logs_layout = QVBoxLayout()
+        logs_layout.addWidget(self.text_area)
+        self.logs_tab.setLayout(logs_layout)
+        self.tabs.addTab(self.logs_tab, "Логи")
+
+        # Сообщения
+        self.messages_tab = QWidget()
+        self.chat_id_input = QLineEdit(self.messages_tab)
+        self.chat_id_input.setPlaceholderText("Введите chat_id")
+
+        self.message_input = QTextEdit(self.messages_tab)
+        self.message_input.setPlaceholderText("Введите сообщение")
+
+        self.send_button = QPushButton("Отправить", self.messages_tab)
+        self.send_button.clicked.connect(self.send_message)
+
+        messages_layout = QVBoxLayout()
+        messages_layout.addWidget(QLabel("Chat ID:"))
+        messages_layout.addWidget(self.chat_id_input)
+        messages_layout.addWidget(QLabel("Сообщение:"))
+        messages_layout.addWidget(self.message_input)
+        messages_layout.addWidget(self.send_button)
+        self.messages_tab.setLayout(messages_layout)
+        self.tabs.addTab(self.messages_tab, "Сообщения")
+
+        # Чаты
+        self.chats_tab = QWidget()
+        self.chats_list = QTextEdit(self.chats_tab)
+        self.chats_list.setReadOnly(True)
+        self.load_chats_button = QPushButton("Загрузить чаты", self.chats_tab)
+        self.load_chats_button.clicked.connect(self.load_chats)
+
+        chats_layout = QVBoxLayout()
+        chats_layout.addWidget(self.chats_list)
+        chats_layout.addWidget(self.load_chats_button)
+        self.chats_tab.setLayout(chats_layout)
+        self.tabs.addTab(self.chats_tab, "Чаты")
+
+        main_layout = QVBoxLayout()
+        main_layout.addWidget(self.tabs)
+        container = QWidget()
+        container.setLayout(main_layout)
+        self.setCentralWidget(container)
+
+    def log(self, message):
+        self.text_area.append(message)
+
+    def send_message(self):
+        chat_id = self.chat_id_input.text()
+        message = self.message_input.toPlainText()
+
+        if not chat_id or not message:
+            self.log("Chat ID и сообщение не могут быть пустыми.")
+            return
+
+        async def send():
+            try:
+                await client.send_message(chat_id, message)
+                self.log(f"Сообщение отправлено в чат {chat_id}: {message}")
+            except Exception as e:
+                self.log(f"Ошибка при отправке сообщения: {e}")
+
+        client.loop.create_task(send())
+
+    def load_chats(self):
+        async def load():
+            try:
+                dialogs = await client.get_dialogs()
+                self.chats_list.clear()
+                for dialog in dialogs:
+                    self.chats_list.append(f"{dialog.name or dialog.title}: {dialog.id}")
+                self.log("Чаты успешно загружены.")
+            except Exception as e:
+                self.log(f"Ошибка при загрузке чатов: {e}")
+
+        client.loop.create_task(load())
+
+# Основная логика запуска
 async def main():
-    # Запуск polling
-    await dp.start_polling()
+    await client.start()
+    logging.info("Telegram Client Started")
+
+    app = QApplication([])
+    gui = TelegramClientGUI()
+    gui.show()
+
+    app.exec_()
 
 async def on_startup(dispatcher):
     asyncio.create_task(clear_cache_daily())
-    logging.info("Бот запущен")
+    logging.info("Cache cleaning task has been started.")
 
-async def on_shutdown(dispatcher: Dispatcher):
-    logging.warning("Бот выключается...")
-    await bot.close()
-    # Здесь можно добавить логику завершения, например, закрытие соединения с БД
-
-bot_instance = None # Экземпляр бота
-bot_task = None # Задача для запуска бота
-
-async def start_bot_async(window): # Делаем функцию асинхронной
-    global bot_task
-    if bot_task is None:
-        # Регистрируем обработчики
-        print("Запуск регистрации обработчиков.")
-        register_handlers_from_directory(dp) # Регистрируем обработчики
-        print("Регистрация обработчиков завершена.")
-        print("Начинаем polling...")
-        try:
-            await on_startup(dp) # Вызываем on_startup
-            await create_db(), executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
-        except Exception as e:
-            logging.exception("Bot polling error:")
-            window.show_message("Error", f"Bot polling error: {e}", QMessageBox.Critical)
-        finally:
-            await on_shutdown(dp) # Вызываем on_shutdown при любом исходе
-            bot_task = None # Обнуляем задачу после завершения
-            window.start_button.setEnabled(True)
-            window.stop_button.setEnabled(False)
-            logging.info("Bot stopped.")
-            window.show_message("Success", "Bot stopped", QMessageBox.Information)
-    else:
-        window.show_message("Warning", "Bot is already running.", QMessageBox.Warning)
-
-def start_bot(window):
-    global bot_task
-    if bot_task is None:
-        bot_task = asyncio.ensure_future(start_bot_async(window)) # Запускаем асинхронную функцию в asyncio
-
-
-def stop_bot(window):
-    if dp and dp.bot:  # Проверка на None
-        async def shutdown_bot():
-            await dp.stop_polling()
-            await dp.bot.close()
-        try:
-            asyncio.run(shutdown_bot())
-        except Exception as e:
-            logging.exception("Error during bot shutdown:")
-            window.show_message("Error", f"Error during bot shutdown: {e}", QMessageBox.Critical)
-
-DATABASE_FILE = "message_cache.db"
-EXPIRATION_TIME = timedelta(days=1)
-
-def create_cache_table():
-    try:
-        with sqlite3.connect(DATABASE_FILE) as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                CREATE TABLE IF NOT EXISTS message_cache (
-                    user_id INTEGER PRIMARY KEY,
-                    group_message_id INTEGER,
-                    group_bot_message_id INTEGER,
-                    private_message_id INTEGER,
-                    expire_time TEXT
-                )
-            """)
-            conn.commit()
-        logging.info("Cache table created (or already exists).")
-    except sqlite3.Error as e:
-        logging.error(f"Error creating cache table: {e}")
-
-def store_message_data(user_id, group_message_id=None, group_bot_message_id=None, private_message_id=None):
-    expire_time = (datetime.utcnow() + EXPIRATION_TIME).isoformat()
-    try:
-        with sqlite3.connect(DATABASE_FILE) as conn:
-            cursor = conn.cursor()
-            cursor.execute("""
-                INSERT OR REPLACE INTO message_cache (user_id, group_message_id, group_bot_message_id, private_message_id, expire_time)
-                VALUES (?, ?, ?, ?, ?)
-            """, (user_id, group_message_id, group_bot_message_id, private_message_id, expire_time))
-            conn.commit()
-        logging.info(f"Stored message data for user {user_id}.")
-    except sqlite3.Error as e:
-        logging.error(f"Error storing message data: {e}")
-
-def get_message_data(user_id):
-    try:
-        with sqlite3.connect(DATABASE_FILE) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT * FROM message_cache WHERE user_id = ?", (user_id,))
-            return cursor.fetchone()
-    except sqlite3.Error as e:
-        logging.error(f"Error getting message data: {e}")
-        return None
-
-def delete_message_data(user_id):
-    try:
-        with sqlite3.connect(DATABASE_FILE) as conn:
-            cursor = conn.cursor()
-            cursor.execute("DELETE FROM message_cache WHERE user_id = ?", (user_id,))
-            conn.commit()
-        logging.info(f"Deleted message data for user {user_id}.")
-    except sqlite3.Error as e:
-        logging.error(f"Error deleting message data: {e}")
-
-def cleanup_cache():
-    try:
-        with sqlite3.connect(DATABASE_FILE) as conn:
-            cursor = conn.cursor()
-            now = datetime.datetime.utcnow().isoformat()  # Только для Python < 3.12
-            cursor.execute("DELETE FROM message_cache WHERE expire_time < ?", (now,))
-            conn.commit()
-        logging.info("Expired cache entries cleaned up.")
-    except sqlite3.Error as e:
-        logging.error(f"Error cleaning up cache: {e}")
-
-def clear_cache(window):
-    try:
-        clear_cache()
-        logging.info("Cache cleared manually.")
-        window.show_message("Success", "Cache cleared.", QMessageBox.Information)
-
-    except Exception as e:
-        logging.error(f"Error clearing cache: {e}")
-        window.show_message("Error", f"Error clearing cache: {e}", QMessageBox.Critical)
-
-def cleanup_cache_thread():
-    create_cache_table()
-    while True:
-        cleanup_cache()
-        time.sleep(86400) # 24 часа
-
-def start_cache_cleanup():
-    threading.Thread(target=cleanup_cache_thread, daemon=True).start()
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Chillify Launcher")
-
-        self.log_widget = QPlainTextEdit()
-        self.log_widget.setReadOnly(True)
-
-        self.start_button = QPushButton("Start Bot")
-        self.stop_button = QPushButton("Stop Bot")
-        self.clear_cache_button = QPushButton("Clear Cache")
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.log_widget)
-        layout.addWidget(self.start_button)
-        layout.addWidget(self.stop_button)
-        layout.addWidget(self.clear_cache_button)
-
-        central_widget = QWidget()
-        central_widget.setLayout(layout)
-        self.setCentralWidget(central_widget)
-
-    def add_log_message(self, message):
-        self.log_widget.appendPlainText(message + "\n")
-        self.log_widget.verticalScrollBar().setValue(self.log_widget.verticalScrollBar().maximum()) # Автопрокрутка
-
-    def show_message(self, title, message, icon=QMessageBox.Information):
-        msg = QMessageBox()
-        msg.setIcon(icon)
-        msg.setText(message)
-        msg.setWindowTitle(title)
-        msg.exec_()
-
-
-class QtHandler(logging.Handler):
-    def __init__(self, widget):
-        super().__init__()
-        self.widget = widget
-
-    def emit(self, record):
-        message = self.format(record)
-        self.widget.add_log_message(message)
-
-def run_gui():
-    app = QApplication(sys.argv)
-    window = MainWindow()
-
-    # Настройка логирования для вывода в виджет и файл
-    qt_handler = QtHandler(window)
-    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-    qt_handler.setFormatter(formatter)
-
-    file_handler = logging.FileHandler('launcher.log', mode='w', encoding='utf-8')
-    file_handler.setFormatter(formatter)
-
-    root_logger = logging.getLogger()
-    root_logger.addHandler(qt_handler)
-    root_logger.addHandler(file_handler)
-    root_logger.setLevel(logging.INFO)
-
-    return app, window
-
-# Запуск бота
-if __name__ == "__main__":
-    app, window = run_gui()
-    logging.basicConfig(filename='launcher.log', level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
-    start_cache_cleanup()
-
-    window.start_button.clicked.connect(lambda: start_bot(window))
-    window.stop_button.clicked.connect(lambda: stop_bot(window))
-    window.clear_cache_button.clicked.connect(lambda: clear_cache(window))
-
-    window.show()
-    sys.exit(app.exec_())
-   
+# Запуск приложения
+if __name__ == '__main__':
+    client.loop.run_until_complete(main())

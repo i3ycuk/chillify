@@ -1,4 +1,4 @@
-from brain import dp, psycopg2, types, localization, get_user_language, logger, InlineKeyboardMarkup, InlineKeyboardButton, bot, add_user, get_random_quote, get_random_meme, get_relax_message, get_gif, Dispatcher, partial, FSMContext, get_user, CommandStart, logging, CallbackData
+from brain import dp, psycopg2, types, localization, get_user_language, logger, InlineKeyboardMarkup, InlineKeyboardButton, bot, add_user, get_random_quote, get_random_meme, get_relax_message, get_gif, Dispatcher, partial, FSMContext, get_user, CommandStart, logging, CallbackData, choice, client, SendReactionRequest, ReactionEmoji, random, AVAILABLE_REACTIONS
 
 async def greet_user(message: types.Message, state: FSMContext):  # Use state
     user_id = message.from_user.id
@@ -29,13 +29,28 @@ async def greet_user(message: types.Message, state: FSMContext):  # Use state
             await message.answer(localization.get("private_welcome"))
         else:
             await message.answer(localization.get("group_welcome"))
+
+    """Приветствие пользователя и добавление реакции."""
+    selected_reaction = random.choice(AVAILABLE_REACTIONS)
+    big_reaction = choice([True])  # Случайным образом выбираем big реакцию: random.choice([True, False])
+    try:
+        # Добавляем реакцию на сообщение
+        await client(SendReactionRequest(
+            peer=message.chat.id,
+            msg_id=message.message_id,
+            reaction=[ReactionEmoji(selected_reaction)],
+            big=big_reaction
+        ))
+    except Exception as e:
+        logging.error(f"Ошибка при добавлении реакции {selected_reaction}: {e}")
+
     await send_start_menu(message, state)
 
 async def send_start_menu(message: types.Message, state: FSMContext):
     user_id = message.from_user.id
     user_data = get_user(user_id)
     if not user_data:
-        logging.error(f"User with ID {user_id} not found in database when trying to send start menu.")
+        logging.error(f"ID пользователя {user_id} не найден в базе данных при отправке меню!")
         return  # Important check to avoid KeyError
 
     language = user_data["language"]
@@ -56,9 +71,9 @@ async def send_start_menu(message: types.Message, state: FSMContext):
 
     try:
         add_user(user_id, first_name, last_name, username, None, None, language)
-        logger.info(f"User {user_id} data potentially updated in send_start_menu.") # Более точное сообщение
+        logger.debug(f"Данные пользователя {user_id} обновлены в базе данных при отправке меню.") # Более точное сообщение
     except psycopg2.Error as e:
-        logger.error(f"Database error (send_start_menu): {e}")
+        logger.error(f"Ошибка базы данных при отправке меню: {e}")
         await message.reply(localization.get("registration_error"))
         return
 
@@ -69,7 +84,7 @@ async def handle_menu_callback(callback_query: types.CallbackQuery):  # callback
     user_id = callback_query.from_user.id
     user_data = get_user(user_id)
     if not user_data:
-        logging.error(f"User with ID {user_id} not found.")
+        logging.error(f"Пользователь с ID {user_id} не найден.")
         return
     language = user_data["language"]
     localization.set_language(language)
@@ -82,7 +97,7 @@ async def handle_menu_callback(callback_query: types.CallbackQuery):  # callback
     if handler:
         await handler(callback_query)
     else:
-        logger.warning(f"Unknown menu item: {item}")
+        logger.warning(f"Неизвестный выбор ответа: {item}")
 
     await callback_query.answer()
 
@@ -108,4 +123,4 @@ def register(dp: Dispatcher):
     dp.register_message_handler(greet_user, CommandStart())
     dp.register_message_handler(send_start_menu, commands=["menu"])
     dp.register_callback_query_handler(handle_menu_callback, lambda c: c.data in ["quotes", "memes", "relax"]) # Фильтрация с помощью lambda
-    logger.info("start registered.")
+    logging.debug("Модуль start: успешно настроен.")

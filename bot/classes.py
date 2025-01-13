@@ -5,7 +5,7 @@ class LocalizationMiddleware(BaseMiddleware):
         user_id = update.message.from_user.id if update.message else update.callback_query.from_user.id
         language = get_user_language(user_id) or "en"
         data["language"] = language
-        print(f"Set language in data: {data}")  # Print data for debugging
+        logging.debug(f"Вывод языка в data: {data}")  # Print data for debugging
         return await handler(update, data)
 
 # Registration remains the same
@@ -27,10 +27,10 @@ class Localization:
                     with open(os.path.join(locales_dir, filename), "r", encoding="utf-8-sig") as file:
                         self.localizations[lang_code] = json.load(file)
                 except (FileNotFoundError, json.JSONDecodeError) as e:
-                    logging.error(f"Error loading localization file {filename}: {e}")
+                    logging.error(f"Ошибка загрузки файла локализации {filename}: {e}")
         if self.default_lang not in self.localizations:
-            logging.critical(f"Default localization '{self.default_lang}' not loaded!")
-            raise FileNotFoundError(f"Default localization '{self.default_lang}' not loaded!")
+            logging.critical(f"Файл локализации по умолчанию '{self.default_lang}' не загружен!")
+            raise FileNotFoundError(f"Файл локализации по умолчанию '{self.default_lang}' не загружен!")
 
     def set_language(self, lang: str):
         self.lang = lang
@@ -39,11 +39,11 @@ class Localization:
         try:
             return self.localizations[self.lang][key]
         except KeyError:
-            logging.error(f"Key '{key}' not found in '{self.lang}'. Trying default.")
+            logging.error(f"Ключ локализации '{key}' не найден в '{self.lang}'. попытка установить язык по умолчанию.")
             try:
                 return self.localizations[self.default_lang][key]
             except KeyError:
-                logging.error(f"Key '{key}' not found even in default '{self.default_lang}'.")
+                logging.error(f"Ключ локализации по умолчанию '{key}' не найден в '{self.default_lang}'.")
                 return f"{{MISSING_TRANSLATION_{key}}}"
 
 class UserState(StatesGroup):

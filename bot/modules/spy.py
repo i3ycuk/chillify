@@ -189,4 +189,4 @@ def register(dp: Dispatcher):
     dp.register_message_handler(start_round, commands=["startround"])
     dp.register_message_handler(vote, commands=["vote"])
     dp.register_message_handler(show_stats, commands=["stats"])
-    print("Обработчик spy успешно зарегистрирован.")
+    logging.debug("Модуль spy: успешно настроен.")

@@ -1,7 +1,7 @@
-from brain import dp, types, get_gif, random, Dispatcher
+from brain import dp, types, get_gif, random, Dispatcher, logging
 
 async def send_relax_message(message: types.Message):
-    print(f"Получена команда: {message.text}")
+    logging.debug(f"Получена команда: {message.text}")
     relax_msg = get_relax_message()
     gif_url = get_gif("relax")
     
@@ -21,4 +21,4 @@ def get_relax_message():
 
 def register(dp: Dispatcher):
     dp.register_message_handler(send_relax_message, commands=["relax"])
-    print("relax успешно зарегистрирован.")
+    logging.debug("Модуль relax: успешно настроен.")

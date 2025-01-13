@@ -1,7 +1,7 @@
-from brain import dp, types, ParseMode, openai, Dispatcher
+from brain import dp, types, ParseMode, openai, Dispatcher, logging
 
 async def send_quote(message: types.Message):
-    print(f"Получена команда: {message.text}")
+    logging.debug(f"Получена команда: {message.text}")
     quote = get_random_quote()
     await message.reply(quote, parse_mode=ParseMode.MARKDOWN)
 
@@ -20,9 +20,9 @@ def get_random_quote():
            )
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
-        print(f"Ошибка при получении цитаты: {e}")
+        logging.error(f"Ошибка при получении цитаты: {e}")
         return "Жизнь слишком коротка, чтобы не наслаждаться каждым моментом. 🌿"
 
 def register(dp: Dispatcher):
     dp.register_message_handler(send_quote, commands=["quotes"])
-    print("quotes успешно зарегистрирован.")
+    logging.debug("Модуль quotes: успешно настроен.")

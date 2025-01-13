@@ -1,10 +1,10 @@
-from brain import dp, types, localization, Dispatcher
+from brain import dp, types, localization, Dispatcher, logging
 
 async def send_help(message: types.Message):
-    print(f"ѕолучена команда: {message.text}")
+    logging.debug(f"Получена команда: {message.text}")
     help_text = (localization.get("help_message"))
     await message.reply(help_text)
 
 def register(dp: Dispatcher):
     dp.register_message_handler(send_help, commands=["help"])
-    print("help успешно зарегистрирован.")
+    logging.debug("Модуль help: успешно настроен.")

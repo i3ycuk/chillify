@@ -1,8 +1,11 @@
 import logging, sqlite3, asyncio, json, random, os, importlib, openai, requests, sys, subprocess, dominate, datetime, psycopg2, threading, time, telethon
 
+from random import choice
 from datetime import timedelta, timezone
 from telethon import TelegramClient, events, sync, errors, utils
 from telethon.tl.functions.account import UpdateStatusRequest
+from telethon.tl.functions.messages import SendReactionRequest
+from telethon.tl.types import ReactionEmoji
 from telethon.sessions import StringSession
 from PyQt5 import QtWidgets, uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTextEdit, QPushButton, QVBoxLayout, QWidget, QPlainTextEdit, QMessageBox, QLineEdit, QTabWidget, QLabel, QListWidget, QListWidgetItem, QLabel
@@ -31,18 +34,20 @@ storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 openai.api_key = OPENAI_API_KEY
 message_cache = defaultdict(dict)
+client = TelegramClient("bot_session", API_ID, API_HASH).start(bot_token=API_TOKEN)
 
 from psycopg2 import sql
 from dominate.tags import html, head, title, body, h1, p, pre, footer, style
 from io import StringIO
 from typing import Optional
-from database import get_user_language, create_db, add_user, connect_db, get_user, update_user_messages
-from classes import *
+from bot.database import get_user_language, create_db, add_user, connect_db, get_user, update_user_messages
+from bot.classes import *
 
 localization = Localization()
 
-from logs import log_stream, error_handler, logger, message_cache, clear_cache_daily, safe_delete_message
-from handlers.giphy import get_gif
-from handlers.quotes import get_random_quote
-from handlers.memes import get_random_meme
-from handlers.relax import get_relax_message
+from bot.logs import log_stream, error_handler, logger, message_cache, clear_cache_daily
+from bot.nonregister.reactlist import AVAILABLE_REACTIONS
+from bot.nonregister.giphy import get_gif
+from bot.modules.quotes import get_random_quote
+from bot.modules.memes import get_random_meme
+from bot.modules.relax import get_relax_message

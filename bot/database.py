@@ -18,7 +18,7 @@ def create_db():
             with conn.cursor() as cursor:
                 cursor.execute("""
                     CREATE TABLE IF NOT EXISTS users (
-                        id INTEGER PRIMARY KEY, -- Уникальный ID пользователя.
+                        id BIGINT PRIMARY KEY, -- Уникальный ID пользователя.
                         first_name TEXT, -- Имя пользователя.
                         last_name TEXT, -- Фамилия пользователя.
                         username TEXT, -- Тег (никнейм) пользователя.
@@ -116,9 +116,9 @@ def add_user(
                         update_values.append(user_id)
                         cursor.execute(update_query, tuple(update_values))
                         conn.commit()
-                        logging.info(f"User {user_id} updated in the database.")
+                        logging.debug(f"Пользователь {user_id} добавлен в базу данных.")
                     else:
-                        logging.info(f"User {user_id} already exists, no updates needed.")
+                        logging.debug(f"Пользователь {user_id} уже есть в базе данных, в записи не нуждается.")
 
                 else:
                     # Пользователя нет, добавляем нового
@@ -131,10 +131,10 @@ def add_user(
                         (user_id, first_name, last_name, username, birth_date, interests, language, status, last_start_message_id, last_bot_message_id),
                     )
                     conn.commit()
-                    logging.info(f"User {user_id} added to the database.")
+                    logging.debug(f"Пользователь {user_id} добавлен в базу данных.")
 
     except psycopg2.Error as e:
-        logging.error(f"Error adding/updating user {user_id} in the database: {e}")
+        logging.error(f"Ошибка записи пользователя {user_id} в базу данных: {e}")
         raise # Важно пробрасывать исключение выше для обработки в вызывающем коде
 
 # Добавление сообщения
@@ -178,7 +178,7 @@ def get_user(user_id):
                     return user_dict
                 return None
     except psycopg2.Error as e:
-        logging.error(f"Ошибка получения пользователя {user_id}: {e}")
+        logging.error(f"Ошибка получения ID пользователя {user_id}: {e}")
         return None
 
 # Получение языка пользователя

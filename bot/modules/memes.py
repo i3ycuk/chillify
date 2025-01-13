@@ -1,7 +1,7 @@
-from brain import dp, types, ParseMode, openai, random, Dispatcher
+from brain import dp, types, ParseMode, openai, random, Dispatcher, logging
 
 async def send_meme(message: types.Message):
-    print(f"Получена команда: {message.text}")
+    logging.debug(f"Получена команда: {message.text}")
     meme = get_random_meme()
     await message.reply(meme, parse_mode=ParseMode.MARKDOWN)
 
@@ -20,7 +20,7 @@ def get_random_meme():
         )
         return response['choices'][0]['message']['content'].strip()
     except Exception as e:
-        print(f"Ошибка при получении мема: {e}")
+        logging.error(f"Ошибка при получении мема: {e}")
         memes = [
             "Когда ты осознал, что понедельник снова наступил... 🤦‍♂️",
             "Когда встал с постели, но уже хочешь вернуться. 😴",
@@ -30,4 +30,4 @@ def get_random_meme():
 
 def register(dp: Dispatcher):
     dp.register_message_handler(send_meme, commands=["memes"])
-    print("memes успешно зарегистрирован.")
+    logging.debug("Модуль memes: успешно настроен.")

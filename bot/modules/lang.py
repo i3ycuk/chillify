@@ -1,5 +1,4 @@
-from brain import asyncio, InlineKeyboardMarkup, InlineKeyboardButton, LANGUAGES_TRANSLATIONS, LANGUAGES_PER_PAGE, LANGUAGES_FLAGS, localization, dp, bot, types, get_user_language, message_cache, logging, connect_db, safe_delete_message
-
+from brain import asyncio, InlineKeyboardMarkup, InlineKeyboardButton, LANGUAGES_TRANSLATIONS, LANGUAGES_PER_PAGE, LANGUAGES_FLAGS, localization, dp, bot, types, get_user_language, message_cache, logging, connect_db
 
 # Генерация клавиатуры выбора языка
 def generate_language_keyboard(page=0):
@@ -37,7 +36,7 @@ async def send_language_picker(message: types.Message):
             group_bot_message = await message.reply(localization.get("go_to_private_message"))
             message_cache[user_id] = {"group_message_id": message.message_id, "group_bot_message_id": group_bot_message.message_id}
         except Exception as e:
-            logging.error(f"Error sending message to group: {e}")
+            logging.error(f"Ошибка отправки сообщения в группу: {e}")
             return
         
         # Попробуем отправить меню в личные сообщения
@@ -45,13 +44,23 @@ async def send_language_picker(message: types.Message):
             private_bot_message = await bot.send_message(user_id, localization.get("choose_language"), reply_markup=keyboard)
             message_cache[user_id]["private_message_id"] = private_bot_message.message_id
         except Exception as e:
-            logging.error(f"Error sending private message to user {user_id}: {e}")
+            logging.error(f"Ошибка отправки сообщения в личку пользователю {user_id}: {e}")
             return
     else:
         try:
             await bot.send_message(user_id, localization.get("choose_language"), reply_markup=keyboard)
         except Exception as e:
-            logging.error(f"Error sending private message to user {user_id}: {e}")
+            logging.error(f"Ошибка отправки сообщения в личку пользователю {user_id}: {e}")
+
+async def safe_delete_message(chat_id: int, message_id: int):
+    try:
+        await bot.delete_message(chat_id, message_id)
+        logging.debug(f"Сообщение {message_id} в чате {chat_id} успешно удалено.")
+    except Exception as e:
+        if "сообщение не найдено" in str(e).lower():
+            logging.debug(f"Сообщение {message_id} уже удалено или недоступно в чате {chat_id}.")
+        else:
+            logging.error(f"Ошибка удаления сообщения {message_id} в чате {chat_id}: {e}")
 
 
 # Обработка выбора языка
@@ -67,9 +76,9 @@ async def language_callback(callback_query: types.CallbackQuery):
             with conn.cursor() as cursor:
                 cursor.execute("UPDATE users SET language = %s WHERE id = %s", (language_code, user_id))
                 conn.commit()
-        logging.info(f"User {user_id}'s language set to {language_code}.")
+        logging.debug(f"Пользователь {user_id} установил язык: {language_code}.")
     except Exception as e:
-        logging.error(f"Error updating language for user {user_id}: {e}")
+        logging.error(f"Ошибка установки языка для пользователя {user_id}: {e}")
         await callback_query.answer(localization.get("lang_update_error"), show_alert=True)
         return
 
@@ -79,6 +88,9 @@ async def language_callback(callback_query: types.CallbackQuery):
         await safe_delete_message(callback_query.message.chat.id, callback_query.message.message_id)
 
         message_data = message_cache.get(user_id, {})
+        if not message_data:
+                logging.debug(f"Кэш сообщений для пользователя {user_id} пуст.")
+                return
         if message_data:
             if message_data.get("group_message_id"):
                 await safe_delete_message(callback_query.message.chat.id, message_data["group_message_id"])
@@ -87,9 +99,9 @@ async def language_callback(callback_query: types.CallbackQuery):
             if message_data.get("private_message_id"):
                 await safe_delete_message(user_id, message_data["private_message_id"])
 
-            message_cache.pop(user_id, None)  # Очищаем кэш после успешного удаления
+            # message_cache.pop(user_id, None)  # Очищаем кэш после успешного удаления
     except Exception as e:
-        logging.error(f"Error deleting messages: {e}")
+        logging.error(f"Ошибка очистки кэша сообщений: {e}")
 
 
 # Обработка смены страницы выбора языка
@@ -105,10 +117,10 @@ async def language_page_callback(callback_query: types.CallbackQuery):
         await bot.edit_message_reply_markup(callback_query.message.chat.id, callback_query.message.message_id, reply_markup=keyboard)
         await callback_query.answer()
     except Exception as e:
-        logging.error(f"Error editing message reply markup: {e}")
+        logging.error(f"Ошибка редактирования сообщения в ответ: {e}")
 
 
 # Регистрация хендлеров
 def register(dp):
     dp.register_message_handler(send_language_picker, commands=["lang"])
-    logging.info("Language picker successfully registered.")
+    logging.debug("Модуль lang: успешно настроен.")

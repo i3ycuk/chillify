@@ -1,19 +1,24 @@
-from brain import logging, dp, BotBlocked, StringIO, connect_db, psycopg2, asyncio, bot
+from brain import logging, dp, BotBlocked, StringIO, connect_db, psycopg2, asyncio, bot, os
+
+# Создаем папку logs, если она не существует
+log_folder = "logs"
+os.makedirs(log_folder, exist_ok=True)
+
+# Путь к файлу логов
+log_file_path = os.path.join(log_folder, "bot.log")
 
 # Настраиваем логирование
 log_stream = StringIO()
 logging.basicConfig(
-    level=logging.INFO, # Уровень логов (INFO в production)
-    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s", # Добавлено имя логгера
+    level=logging.DEBUG,  # Уровень логов (DEBU в production)
+    format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
     encoding="utf-8",
     handlers=[
-        logging.FileHandler("bot.log", encoding="utf-8"), # Запись в файл
-        logging.StreamHandler() # Вывод в консоль
+        logging.FileHandler(log_file_path, encoding="utf-8"),  # Запись в файл
+        logging.StreamHandler(),  # Вывод в консоль
+        logging.StreamHandler(log_stream)  # Запись в StringIO
     ]
 )
-
-# Пример записи в логи
-logging.info("Бот запущен!")
 
 # Ошибка: BotBlocked
 @dp.errors_handler()
@@ -34,7 +39,7 @@ async def error_handler(update, exception):
     return True
 
 logger = logging.getLogger(__name__) # Получаем логгер для текущего модуля
-logger.debug("Debug сообщение из logs.py") # Пример использования debug-уровня
+logger.debug("Логи успешно настроены.") # Пример использования debug-уровня
 
 # Новый кэш с автоматической очисткой
 message_cache = {}
@@ -44,11 +49,4 @@ async def clear_cache_daily():
     while True:
         await asyncio.sleep(86400)  # 24 часа
         message_cache.clear()
-        logging.info("Message cache has been cleared.")
-
-async def safe_delete_message(chat_id, message_id):
-    try:
-        await bot.delete_message(chat_id, message_id)
-    except Exception as e:
-        if "message to delete not found" not in str(e).lower():
-            logging.error(f"Error deleting message {message_id} in chat {chat_id}: {e}")
+        logging.debug("Кэш сообщений успешно очищен.")

@@ -1,7 +1,7 @@
-from brain import GIPHY_API_KEY, requests, random
+from brain import GIPHY_API_KEY, requests, random, logging
 
 def get_gif(query):
-    print("Отправлен запрос GIF")
+    logging.debug("Отправлен запрос GIF")
     url = f"https://api.giphy.com/v1/gifs/search"
     params = {
         "api_key": GIPHY_API_KEY,
@@ -18,5 +18,5 @@ def get_gif(query):
             return random.choice(gifs)["images"]["original"]["url"]
         return None
     except requests.exceptions.RequestException as e:
-        print(f"Ошибка при запросе GIF: {e}")
+        logging.error(f"Ошибка при запросе GIF: {e}")
         return None

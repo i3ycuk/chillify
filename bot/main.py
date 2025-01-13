@@ -1,6 +1,14 @@
+from pathlib import Path
+import sys
+
+# Добавляем корень проекта в sys.path
+project_root = Path(__file__).resolve().parent.parent  # Переход на два уровня вверх
+sys.path.append(str(project_root))
+
+# Теперь можно импортировать brain.py
 from brain import Dispatcher, os, importlib, logging, dp, create_db, executor, localization, asyncio, clear_cache_daily
 
-def register_handlers_from_directory(dp, handlers_dir="handlers"):
+def register_handlers_from_directory(dp, handlers_dir="modules"):
     base_dir = os.path.dirname(os.path.abspath(__file__))
     handlers_path = os.path.join(base_dir, handlers_dir)
 
@@ -19,26 +27,28 @@ def register_handlers_from_directory(dp, handlers_dir="handlers"):
                 if hasattr(module, "register"):
                     module.register(dp)
                 else:
-                    logging.warning(f"Модуль {module_name} не содержит функции register.")
+                    logging.debug(f"Модуль {file_name}: не имеет регистрации.")
             except ImportError as e:
-                logging.error(f"Ошибка при импорте модуля {module_name}: {e}")
+                logging.error(f"Ошибка при импорте модуля {file_name}: {e}")
             except Exception as e:
-                logging.exception(f"Неожиданная ошибка при регистрации обработчиков из {module_name}:") # Логируем полный traceback
+                logging.exception(f"Неожиданная ошибка при регистрации обработчиков из {file_name}:") # Логируем полный traceback
 
 # Регистрируем обработчики
-print("Запуск регистрации обработчиков.")
+logging.debug("Регистрация модулей...")
 register_handlers_from_directory(dp)
-print("Регистрация обработчиков завершена.")
-print("Начинаем polling...")
-print("Бот запущен!")
+logging.debug("Регистрация модулей: завершена.")
+
+
 
 async def main():
     # Запуск polling
+    logging.debug("Запуск бота...")
     await dp.start_polling()
+    logging.debug("Бот успешно запустился.")
 
 async def on_startup(dispatcher):
     asyncio.create_task(clear_cache_daily())
-    logging.info("Cache cleaning task has been started.")
+    logging.debug("Служба очистки кэша был успешно запущен.")
 
 # Запуск бота
 if __name__ == '__main__':

@@ -1,0 +1,79 @@
+/* Общие стили */
+body {
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+.container {
+    padding: 20px;
+    border-radius: 15px;
+    max-width: 800px;
+    z-index: 2;
+}
+
+.banner h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.banner p {
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+}
+
+.bot-link, .developer-link {
+    color: #3b74b1;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+    .bot-link:hover, .developer-link:hover {
+        text-decoration: underline;
+    }
+
+.controls {
+    margin-top: 20px;
+}
+
+    .controls button {
+        font-size: 1.5rem;
+        padding: 10px;
+        margin: 5px;
+        background-color: #3b74b1;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+        .controls button:hover {
+            background-color: #2a5480;
+        }
+
+/* Фоновая анимация травы */
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: -1;
+}
+
+.grass-animation {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    opacity: 0.6;
+}

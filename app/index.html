@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chillify 🌿 - В разработке</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        /* Общие стили */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .container {
+            text-align: center;
+            z-index: 2;
+            padding: 40px;
+            border-radius: 15px;
+            background: rgba(0, 0, 0, 0.6);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .banner h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #e0e0e0;
+        }
+
+        .banner p {
+            font-size: 1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: #e0e0e0;
+        }
+
+        .banner a {
+            color: #3b74b1;
+            font-weight: bold;
+            text-decoration: none;
+            border-bottom: 2px solid #3b74b1;
+        }
+
+            .banner a:hover {
+                color: #fff;
+                background-color: #3b74b1;
+                border-radius: 5px;
+                padding: 5px;
+            }
+
+        /* Анимация травы на фоне */
+        .background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background-image: url("/grass.gif");
+            background-position: bottom;
+            background-repeat: no-repeat;
+            background-size: cover;
+            opacity: 0.8;
+        }
+
+        /* Фоновая музыка */
+        audio {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="banner">
+            <h1>Chillify 🌿</h1>
+            <p>
+                Наш проект находится на ранней стадии разработки, и мы работаем над созданием уникальной атмосферы для каждого пользователя. Мы благодарны за ваше терпение и веру в нас. Со временем Chillify будет развиваться, чтобы предоставить вам самые лучшие моменты релаксации и покоя.
+            </p>
+            <p>
+                Мы приглашаем вас быть частью нашего путешествия. Пожалуйста, следите за новыми обновлениями и верьте в наш успех!
+            </p>
+            <p>
+                Присоединяйтесь к нашему <a href="https://t.me/ChillifyBot" target="_blank">боту Chillify</a> и оставайтесь на связи с нами.
+            </p>
+            <p>
+                Связь с разработчиком: <a href="https://t.me/li3ycuk" target="_blank">@li3ycuk</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Фоновая музыка -->
+    <audio loop autoplay>
+        <source src="/chill.mp3" type="audio/mp3">
+        Ваш браузер не поддерживает аудио.
+    </audio>
+
+    <!-- Анимация травы на фоне -->
+    <div class="background"></div>
+</body>
+</html>

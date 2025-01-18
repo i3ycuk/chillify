@@ -21,6 +21,7 @@ from aiogram.utils.markdown import text, bold, italic, code
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher.middlewares import BaseMiddleware
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.middlewares.logging import LoggingMiddleware
 from aiogram.dispatcher.filters import Command
 from collections import defaultdict
 from locales.languages import LANGUAGES_PER_PAGE, LANGUAGES, LANGUAGES_TRANSLATIONS, LANGUAGES_FLAGS

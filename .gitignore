@@ -184,3 +184,5 @@ cache/chillify.db
 game_results.db
 bot_session.session-journal
 bot_session.session
+app/.vercel/README.txt
+app/.vercel/project.json

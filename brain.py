@@ -16,7 +16,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import CommandStart
 from aiogram.dispatcher import FSMContext
 from aiogram.utils import executor
-from aiogram.utils.exceptions import BotBlocked, MessageToDeleteNotFound, MessageCantBeDeleted
+from aiogram.utils.exceptions import BotBlocked, MessageToDeleteNotFound, MessageCantBeDeleted, TelegramAPIError
 from aiogram.utils.markdown import text, bold, italic, code
 from aiogram.utils.callback_data import CallbackData
 from aiogram.dispatcher.middlewares import BaseMiddleware

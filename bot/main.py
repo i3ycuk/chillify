@@ -53,4 +53,4 @@ async def on_startup(dispatcher):
 # Запуск бота
 if __name__ == '__main__':
     create_db()
-    executor.start_polling(dp, skip_updates=True, on_startup=on_startup)
+    executor.start_polling(dp, skip_updates=False, on_startup=on_startup)

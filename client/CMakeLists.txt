@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
 
 # ”казываем файлы интерфейса
-file(GLOB_RECURSE UI_SOURCES "ui/*.cpp")
+file(GLOB_RECURSE UI_SOURCES "tdesktop-dev/Telegram/SourceFiles/ui/*.cpp")
 # file(GLOB_RECURSE STYLE_SOURCES "SourceFiles/styles/*.cpp")
 
 add_executable(BotClient ${UI_SOURCES} ${STYLE_SOURCES})

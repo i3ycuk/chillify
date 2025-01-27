@@ -1,4 +1,4 @@
-import logging, sqlite3, asyncio, json, random, os, importlib, openai, requests, sys, subprocess, dominate, datetime, psycopg2, threading, time, telethon
+import logging, sqlite3, asyncio, json, random, os, importlib, openai, requests, sys, subprocess, dominate, datetime, psycopg2, threading, time, telethon, subprocess
 
 from random import choice
 from datetime import timedelta, timezone

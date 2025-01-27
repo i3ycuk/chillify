@@ -5,19 +5,17 @@ import sys
 project_root = Path(__file__).resolve().parent.parent  # Переход на два уровня вверх
 sys.path.append(str(project_root))
 
-import subprocess
-import logging
-from PyQt5.QtWidgets import QApplication
-from brain import client
-from telethon import TelegramClient, events
+from brain import client, TelegramClient, events, QApplication, logging, subprocess, API_TOKEN
 
 
 # Настройка логгирования
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
 
-
-def main():
+async def main():
+    await client.start(API_TOKEN)
+    me = await client.get_me()
+    logger.info(f'Авторизация как: @{me.username}')
 
     # Запуск бота через subprocess
     try:
@@ -26,7 +24,5 @@ def main():
     except Exception as e:
         logger.error(f"Ошибка при запуске клиента: {e}")
 
-if __name__ == '__main__':
-    client.start()
-    client.run_until_disconnected()
-    main()
+with client:
+    client.loop.run_until_complete(main())

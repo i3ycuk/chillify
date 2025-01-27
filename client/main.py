@@ -5,12 +5,13 @@ import sys
 project_root = Path(__file__).resolve().parent.parent  # Переход на два уровня вверх
 sys.path.append(str(project_root))
 
-from brain import client, TelegramClient, events, QApplication, logging, subprocess, API_TOKEN
-
+from brain import client, TelegramClient, events, QApplication, logging, subprocess, API_TOKEN, TELEGRAM_SOURCE_DIR
 
 # Настройка логгирования
 logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 logger = logging.getLogger(__name__)
+
+logger.info(f"Используем исходный код Telegram Desktop из: {TELEGRAM_SOURCE_DIR}")
 
 async def main():
     await client.start(API_TOKEN)

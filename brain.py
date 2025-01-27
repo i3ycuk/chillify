@@ -26,7 +26,7 @@ from aiogram.dispatcher.filters import Command
 from collections import defaultdict
 from locales.languages import LANGUAGES_PER_PAGE, LANGUAGES, LANGUAGES_TRANSLATIONS, LANGUAGES_FLAGS
 from dotenv import load_dotenv
-from config import API_TOKEN, OPENAI_API_KEY, GIPHY_API_KEY, DB_SETTINGS, API_ID, API_HASH, DATABASE_FILE, CACHE_EXPIRATION_TIME, PHONE_NUMBER, LOG_FILE, LOG_LEVEL
+from config import API_TOKEN, OPENAI_API_KEY, GIPHY_API_KEY, DB_SETTINGS, API_ID, API_HASH, DATABASE_FILE, CACHE_EXPIRATION_TIME, PHONE_NUMBER, LOG_FILE, LOG_LEVEL, TELEGRAM_SOURCE_DIR
 from functools import partial
 
 bot = Bot(token=API_TOKEN)

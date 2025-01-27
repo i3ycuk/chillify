@@ -1,16 +1,17 @@
-cmake_minimum_required(VERSION 3.16)
-project(BotClient)
+cmake_minimum_required(VERSION 3.14)
+project(telegram_bindings)
 
-set(CMAKE_CXX_STANDARD 17)
+# Использование FetchContent для загрузки pybind11
+include(FetchContent)
+FetchContent_Declare(
+    pybind11
+    GIT_REPOSITORY https://github.com/pybind/pybind11.git
+    GIT_TAG v2.13.6  # Укажите нужную версию
+)
+FetchContent_MakeAvailable(pybind11)
 
-# Пути к Qt
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui)
+# Создание модуля Python
+pybind11_add_module(telegram_bindings telegram_bindings.cpp)
 
-# Указываем файлы интерфейса
-file(GLOB_RECURSE UI_SOURCES "tdesktop-dev/Telegram/SourceFiles/ui/*.cpp")
-# file(GLOB_RECURSE STYLE_SOURCES "SourceFiles/styles/*.cpp")
-
-add_executable(BotClient ${UI_SOURCES} ${STYLE_SOURCES})
-
-# Подключение Qt
-target_link_libraries(BotClient Qt5::Core Qt5::Widgets Qt5::Gui)
+# Связывание с библиотекой TelegramCore
+target_link_libraries(telegram_bindings PRIVATE TelegramCore)

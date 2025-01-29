@@ -13,7 +13,7 @@ DATABASE_FILE = "telethon_cache.db"
 CACHE_EXPIRATION_TIME = timedelta(days=1)
 LOG_FILE = "chillify_client.log"
 LOG_LEVEL = logging.INFO
-TELEGRAM_SOURCE_DIR = "client.tdesktop-dev.Telegram"
+TELEGRAM_SOURCE_DIR = os.path.join(os.path.dirname(__file__), "client", "tdesktop-dev")
 
 DB_SETTINGS = {
     'dbname': os.getenv("DB_NAME"),

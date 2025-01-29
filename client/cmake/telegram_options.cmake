@@ -5,13 +5,51 @@
 # https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 
 option(TDESKTOP_API_TEST "Use test API credentials." OFF)
-set(TDESKTOP_API_ID "0" CACHE STRING "Provide 'api_id' for the Telegram API access.")
-set(TDESKTOP_API_HASH "" CACHE STRING "Provide 'api_hash' for the Telegram API access.")
+
+# Find the brain.py file three directories up
+file(GLOB_RECURSE BRAIN_PY_FILES "../../../brain.py")
+
+# Check if brain.py was found
+if (NOT BRAIN_PY_FILES)
+    message(FATAL_ERROR "brain.py not found three directories up!")
+else()
+    # Extract API_ID and API_HASH from brain.py using a Python script
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E
+        echo "import brain; print(brain.API_ID); print(brain.API_HASH)"
+        OUTPUT_VARIABLE API_ID_OUTPUT
+        ERROR_VARIABLE API_ID_ERROR
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} # Important: Set working directory!
+    )
+
+    execute_process(
+        COMMAND ${CMAKE_COMMAND} -E
+        echo "import brain; print(brain.API_HASH)"
+        OUTPUT_VARIABLE API_HASH_OUTPUT
+        ERROR_VARIABLE API_HASH_ERROR
+        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} # Important: Set working directory!
+    )
+
+    if (API_ID_ERROR OR API_HASH_ERROR)
+        message(FATAL_ERROR "Error extracting API credentials from brain.py: ${API_ID_ERROR} ${API_HASH_ERROR}")
+    else()
+        string(STRIP "${API_ID_OUTPUT}" TDESKTOP_API_ID)
+                string(STRIP "${API_HASH_OUTPUT}" TDESKTOP_API_HASH)
+        # Remove any newline characters
+
+    endif()
+
+    # Set the cache variables (optional, but good practice)
+    set(TDESKTOP_API_ID "${TDESKTOP_API_ID}" CACHE STRING "Provide 'api_id' for the Telegram API access.")
+    set(TDESKTOP_API_HASH "${TDESKTOP_API_HASH}" CACHE STRING "Provide 'api_hash' for the Telegram API access.")
+endif()
+
 
 if (TDESKTOP_API_TEST)
     set(TDESKTOP_API_ID 17349)
     set(TDESKTOP_API_HASH 344583e45741c457fe1862106095a5eb)
 endif()
+
 
 if (TDESKTOP_API_ID STREQUAL "0" OR TDESKTOP_API_HASH STREQUAL "")
     message(FATAL_ERROR
@@ -36,18 +74,4 @@ if (TDESKTOP_API_ID STREQUAL "0" OR TDESKTOP_API_HASH STREQUAL "")
     " ")
 endif()
 
-if (DESKTOP_APP_DISABLE_AUTOUPDATE)
-    target_compile_definitions(Telegram PRIVATE TDESKTOP_DISABLE_AUTOUPDATE)
-endif()
-
-if (DESKTOP_APP_DISABLE_CRASH_REPORTS)
-    target_compile_definitions(Telegram PRIVATE TDESKTOP_DISABLE_CRASH_REPORTS)
-endif()
-
-if (DESKTOP_APP_USE_PACKAGED)
-    target_compile_definitions(Telegram PRIVATE TDESKTOP_USE_PACKAGED)
-endif()
-
-if (DESKTOP_APP_SPECIAL_TARGET)
-    target_compile_definitions(Telegram PRIVATE TDESKTOP_ALLOW_CLOSED_ALPHA)
-endif()
+# ... (rest of your CMakeLists.txt)
